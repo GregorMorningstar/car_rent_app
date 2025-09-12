@@ -21,7 +21,7 @@ export function MainNav({ authenticated }: MainNavProps) {
           {/* Home link poprawiony na "/" */}
             <Link href="/" className="hover:text-[#F53003] transition">Home</Link>
             <Link href="/o-nas" className="hover:text-[#F53003] transition">About</Link>
-            <Link href="/#cars" className="hover:text-[#F53003] transition">Cars</Link>
+            <Link href="/cars" className="hover:text-[#F53003] transition">Cars</Link>
             <Link href="/kontakt" className="hover:text-[#F53003] transition">Contact</Link>
                         <Link href="/blog" className="hover:text-[#F53003] transition">Blog</Link>
 
@@ -51,7 +51,7 @@ export function MainNav({ authenticated }: MainNavProps) {
             <div className="absolute top-0 right-0 w-64 h-full bg-white dark:bg-neutral-900 shadow-lg p-6 flex flex-col gap-4">
               <Link href="/" onClick={() => setOpen(false)} className="hover:text-[#F53003]">Home</Link>
               <Link href="/o-nas" onClick={() => setOpen(false)} className="hover:text-[#F53003]">About</Link>
-              <Link href="/#cars" onClick={() => setOpen(false)} className="hover:text-[#F53003]">Cars</Link>
+              <Link href="/cars" onClick={() => setOpen(false)} className="hover:text-[#F53003]">Cars</Link>
               <Link href="/kontakt" onClick={() => setOpen(false)} className="hover:text-[#F53003]">Contact</Link>
                             <Link href="/blog" onClick={() => setOpen(false)} className="hover:text-[#F53003]">Blog</Link>
 

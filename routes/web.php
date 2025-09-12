@@ -6,7 +6,8 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\CalendarController;
-
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ModeratorController;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -16,8 +17,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+});
 
 
+Route::middleware(['auth', 'role:moderator'])->group(function () {
+    Route::get('/moderator', [ModeratorController::class, 'index'])->name('moderator.dashboard');
+});
 //dla wszystkich 
 
 Route::get('/kontakt', [PageController::class, 'showContact'])->name('contact');  

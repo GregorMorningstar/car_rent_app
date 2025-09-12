@@ -24,6 +24,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Relacja: Użytkownik ma wiele postów
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
