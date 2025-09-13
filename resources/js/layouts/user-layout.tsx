@@ -1,14 +1,14 @@
 import { ReactNode } from 'react';
-import { AdminMenu } from '@/components/ui/admin-menu';
+import { UserMenu } from '@/components/ui/user-menu';
 import { usePage } from '@inertiajs/react';
 
-interface AdminLayoutProps {
+interface UserLayoutProps {
   children: ReactNode;
   breadcrumbs?: Array<{ title: string; href?: string }>;
   title?: string;
 }
 
-export default function AdminLayout({ children, breadcrumbs, title }: AdminLayoutProps) {
+export default function UserLayout({ children, breadcrumbs, title }: UserLayoutProps) {
   const page = usePage<{ auth?: { user?: { name?: string } } }>();
   const userName = page.props.auth?.user?.name || 'Użytkownik';
 
@@ -16,7 +16,7 @@ export default function AdminLayout({ children, breadcrumbs, title }: AdminLayou
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 border-r bg-card/40 backdrop-blur sm:block">
-        <AdminMenu userName={userName} />
+        <UserMenu userName={userName} />
       </aside>
 
       {/* Main area */}

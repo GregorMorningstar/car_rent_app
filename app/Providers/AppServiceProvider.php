@@ -11,10 +11,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        
-        //
-    }
 
+ $this->app->bind(
+            \App\Interfaces\PostRepositoryInterface::class,
+            \App\Repositories\PostRepository::class
+        );
+    }
     /**
      * Bootstrap any application services.
      */

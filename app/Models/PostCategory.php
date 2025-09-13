@@ -13,8 +13,7 @@ class PostCategory extends Model
 
     protected $fillable = [
         'name', // nazwa kategorii
-        'description', // opis kategorii
-        'slug', // przyjazny URL
+        
     ];
 
 

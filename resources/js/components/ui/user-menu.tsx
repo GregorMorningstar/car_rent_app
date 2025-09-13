@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 
-interface AdminMenuProps {
+interface UserMenuProps {
   userName?: string;
 }
 
@@ -14,11 +14,11 @@ const menuItems = [
   { label: 'Ustawienia', href: '/settings' },
 ];
 
-export function AdminMenu({ userName }: AdminMenuProps) {
+export function UserMenu({ userName }: UserMenuProps) {
   return (
     <nav className="flex h-full flex-col gap-2 p-4">
       <div className="mb-1 px-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Panel administracyjny
+        Panel użytkownika
       </div>
       <div className="mb-4 px-2 text-xs text-muted-foreground">
         {userName || 'Użytkownik'}

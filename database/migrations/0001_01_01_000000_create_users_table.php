@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\RoleUserEnum;
+use App\Enum\RoleUserEnum;
 return new class extends Migration
 {
     /**
@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('role', RoleUserEnum::values())->default(RoleUserEnum::USER);
+            $table->enum('role', array_column(RoleUserEnum::cases(), 'value'))->default(RoleUserEnum::USER->value);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

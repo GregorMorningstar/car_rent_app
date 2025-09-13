@@ -19,19 +19,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('admin.blog.create');
+    Route::post('/admin/post-categories', [BlogController::class, 'store'])
+        ->name('admin.post-categories.store');
+    //car
+    Route::get('/admin/cars/create', [AdminController::class, 'createCar'])->name('admin.cars.create');
 });
 
 
 Route::middleware(['auth', 'role:moderator'])->group(function () {
     Route::get('/moderator', [ModeratorController::class, 'index'])->name('moderator.dashboard');
 });
-//dla wszystkich 
+//dla wszystkich
 
-Route::get('/kontakt', [PageController::class, 'showContact'])->name('contact');  
-Route::get('/o-nas',[PageController::class, 'showAbout'])->name('about');  
+Route::get('/kontakt', [PageController::class, 'showContact'])->name('contact');
+Route::get('/o-nas',[PageController::class, 'showAbout'])->name('about');
 
 
-Route::get('/blog', [BlogController::class, 'index'])->name('blog');   
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{id}', [BlogController::class, 'show'])->name('blog.show');
 
 
