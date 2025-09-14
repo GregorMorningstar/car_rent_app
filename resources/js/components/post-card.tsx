@@ -1,21 +1,22 @@
 import React from 'react';
+import { Link } from '@inertiajs/react';
 
 type Post = {
 	id: number;
 	title: string;
-	body: string;
-	slug: string;
-	meta_title?: string;
-	meta_description?: string;
-	meta_keywords?: string;
-	og_image?: string;
-	canonical_url?: string;
-	image_path?: string;
+	content?: string | null;
+	slug?: string | null;
+	meta_title?: string | null;
+	meta_description?: string | null;
+	meta_keywords?: string | null;
+	og_image?: string | null;
+	canonical_url?: string | null;
+	image_path?: string | null;
 	user?: {
 		id: number;
 		name: string;
-	};
-	created_at?: string;
+	} | null;
+	created_at?: string | null;
 };
 
 interface PostCardProps {
@@ -23,6 +24,7 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post }) => {
+	const content = (post.content ?? '').toString();
 	return (
 		<div className="bg-white rounded shadow p-4 mb-4">
 			{post.image_path && (
@@ -40,14 +42,14 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
 				)}
 			</div>
 			<div className="mb-3 text-gray-800">
-				{post.body.length > 200 ? post.body.slice(0, 200) + '...' : post.body}
+				{content.length > 200 ? content.slice(0, 200) + '...' : content}
 			</div>
-			<a
-				href={post.canonical_url || `/posts/${post.slug}`}
+			<Link
+				href={`/blog/${post.id}`}
 				className="text-blue-600 hover:underline font-medium"
 			>
 				Read more
-			</a>
+			</Link>
 			{/* SEO meta info (optional, for debugging/preview) */}
 			{/*
 			<div className="mt-2 text-xs text-gray-400">

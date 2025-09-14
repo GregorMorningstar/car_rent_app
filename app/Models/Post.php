@@ -8,7 +8,7 @@ class Post extends Model
 {
     protected $fillable = [
         'title', // tytuł
-        'body', // treść
+        'content', // treść
         'slug', // przyjazny URL
         'meta_title', // tytuł SEO
         'meta_description', // opis SEO
@@ -17,6 +17,7 @@ class Post extends Model
         'canonical_url', // kanoniczny adres URL
         'image_path', // ścieżka do obrazka
         'user_id', // autor
+        'post_category_id', // kategoria posta
     ];
 
     /**

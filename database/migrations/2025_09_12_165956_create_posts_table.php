@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->text('content');
             $table->foreignId('post_category_id')->constrained('post_categories')->onDelete('cascade'); // kategoria posta
             $table->string('meta_title', 60)->nullable(); // tytuł SEO
             $table->string('meta_description', 160)->nullable(); // opis SEO
