@@ -15,7 +15,7 @@ export default function CreatePostCategory() {
 
   return (
     <div className="max-w-3xl mr-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Create New Post Category</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Dodaj Kategorie Posta</h1> */}
       <form onSubmit={onSubmit} className="flex items-center gap-3">
         <label htmlFor="name" className="sr-only">
           Category name
@@ -25,7 +25,7 @@ export default function CreatePostCategory() {
           type="text"
           value={data.name}
           onChange={(e) => setData('name', e.target.value)}
-          placeholder="Category name"
+          placeholder="Nazwa kategorii"
           className="flex-1 min-w-0 rounded border px-3 py-2"
           aria-invalid={!!errors.name}
         />
@@ -34,7 +34,7 @@ export default function CreatePostCategory() {
           disabled={processing}
           className="whitespace-nowrap rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 disabled:opacity-60"
         >
-          Create
+          Utwórz
         </button>
         {errors.name && <span className="ml-2 text-sm text-red-600">{errors.name}</span>}
       </form>

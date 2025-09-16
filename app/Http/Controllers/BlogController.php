@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Services\PostService;
-use App\Models\PostCategory;
 use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
@@ -13,13 +12,28 @@ use Illuminate\Support\Facades\Log;
 
 class BlogController extends Controller
 {
-    protected $postService;
+    /** @var PostService */
+    protected PostService $postService;
 
     public function __construct(PostService $postService)
     {
         $this->postService = $postService;
     }
 
+    // ----------------------
+    // Categories (listing)
+    // ----------------------
+    public function indexCategories()
+    {
+        $categories = $this->postService->allCategories();
+        return Inertia::render('blog/categories', [
+            'categories' => $categories
+        ]);
+    }
+
+    // ----------------------
+    // Posts (public index)
+    // ----------------------
     public function index()
     {
         $posts = collect($this->postService->getAllPosts())
@@ -51,9 +65,13 @@ class BlogController extends Controller
             'posts' => $posts,
         ]);
     }
+
+    // ----------------------
+    // Post (public show)
+    // ----------------------
     public function show($id)
     {
-        $model = $this->postService->find($id);
+        $model = $this->postService->findPost((int) $id);
         if (!$model) {
             abort(404);
         }
@@ -83,17 +101,20 @@ class BlogController extends Controller
         ]);
     }
 
-
-
+    // ----------------------
+    // Post (admin create)
+    // ----------------------
     public function create()
     {
-
-        $categories = $this->postService->getAllPostCategories();
+        $categories = $this->postService->allCategories();
         return Inertia::render('blog/create', [
             'categories' => $categories
         ]);
     }
 
+    // ----------------------
+    // Post (admin store)
+    // ----------------------
     public function storePost(Request $request)
     {
         $validated = $request->validate([
@@ -158,7 +179,7 @@ class BlogController extends Controller
             $data['meta_description'] = $data['meta_description'] ?? $this->smartTrim($plain, 160);
 
             if (empty($data['meta_keywords'])) {
-                $category = PostCategory::find($data['post_category_id']);
+                $category = $this->postService->findCategory((int) $data['post_category_id']);
                 $stop = ['i','oraz','dla','na','po','jak','o','do','z','ze','że','nie','to','a','w','u','od','bez','ale'];
                 $titleWords = collect(str_word_count(Str::lower($data['title']), 1, 'ąćęłńóśźż'))
                     ->filter(fn ($w) => mb_strlen($w) >= 3 && !in_array($w, $stop, true))
@@ -171,7 +192,7 @@ class BlogController extends Controller
             }
 
             unset($data['image']); // nie zapisujemy UploadedFile
-            $this->postService->create($data);
+            $this->postService->createPost($data);
 
         } catch (\Throwable $e) {
             Log::error('Błąd podczas tworzenia posta', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -181,6 +202,9 @@ class BlogController extends Controller
         return redirect()->route('admin.blog.create')->with('success', 'Post został utworzony.');
     }
 
+    // ----------------------
+    // Category (admin store)
+    // ----------------------
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -190,7 +214,7 @@ class BlogController extends Controller
         ]);
 
         try {
-            PostCategory::create([
+            $this->postService->createCategory([
                 'name' => $data['name'],
             ]);
         } catch (QueryException $e) {
@@ -203,6 +227,60 @@ class BlogController extends Controller
         return back()->with('success', 'Kategoria została utworzona.');
     }
 
+    // ----------------------
+    // Category (admin edit)
+    // ----------------------
+    public function editCategory(int $id)
+    {
+        $category = $this->postService->findCategory($id);
+        if (!$category) {
+            abort(404);
+        }
+
+        return Inertia::render('blog/categories_edit', [
+            'category' => [
+                'id' => $category->id,
+                'name' => $category->name,
+            ],
+        ]);
+    }
+
+    // ----------------------
+    // Category (admin update)
+    // ----------------------
+    public function updateCategory(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:post_categories,name,' . $id],
+        ], [
+            'name.unique' => 'Taka kategoria już istnieje.',
+        ]);
+
+        try {
+            $this->postService->updateCategory($id, ['name' => $data['name']]);
+        } catch (QueryException $e) {
+            if (($e->errorInfo[1] ?? null) === 1062) {
+                return back()->withErrors(['name' => 'Taka kategoria już istnieje.'])->withInput();
+            }
+            throw $e;
+        }
+
+        return redirect()->route('admin.post-categories.index')->with('success', 'Kategoria zaktualizowana.');
+    }
+
+    // ----------------------
+    // Category (admin delete)
+    // ----------------------
+    public function destroyCategory(int $id)
+    {
+        try {
+            $this->postService->deleteCategory($id);
+        } catch (QueryException $e) {
+            return back()->withErrors(['name' => 'Nie można usunąć kategorii powiązanej z postami.']);
+        }
+
+        return back()->with('success', 'Kategoria została usunięta.');
+    }
     // Pomocnicze metody SEO
     private function cleanMetaText(string $text): string
     {
@@ -211,7 +289,6 @@ class BlogController extends Controller
         $t = preg_replace('/\s+/u', ' ', $t);
         return trim($t);
     }
-
     private function smartTrim(string $text, int $limit = 160): string
     {
         $t = trim($text);
@@ -223,5 +300,38 @@ class BlogController extends Controller
         $cut = rtrim($cut);
         $cut = preg_replace('/[^\p{L}\p{N}]+$/u', '', $cut);
         return $cut;
+    }
+
+    //Post Admin Article Actions
+    public function indexArticle()
+    {
+        $posts = collect($this->postService->getAllPosts())
+            ->map(function ($post) {
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title ?? '',
+                    'content' => $post->content ?? '',
+                    // usunięto slug
+                    'meta_title' => $post->meta_title ?? null,
+                    'meta_description' => $post->meta_description ?? null,
+                    'meta_keywords' => $post->meta_keywords ?? null,
+                    'og_image' => $post->og_image ?? null,
+                    'canonical_url' => $post->canonical_url ?? null,
+                    'image_path' => $post->image_path
+                            ? (Str::startsWith($post->image_path, ['http://', 'https://'])
+                                ? $post->image_path
+                                : ('/storage/' . ltrim($post->image_path, '/')))
+                        : null,
+                    'user' => $post->user
+                        ? ['id' => $post->user->id, 'name' => $post->user->name]
+                        : null,
+                    'created_at' => optional($post->created_at)->toDateString(),
+                ];
+            })
+            ->values();
+
+        return Inertia::render('blog/article_index', [
+            'posts' => $posts,
+        ]);
     }
 }

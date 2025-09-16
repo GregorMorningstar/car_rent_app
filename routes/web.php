@@ -17,19 +17,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/blog/create', [BlogController::class, 'create'])->name('admin.blog.create');
-    Route::post('/admin/post-categories', [BlogController::class, 'store'])
-        ->name('admin.post-categories.store');
-    Route::post('/admin/blog', [BlogController::class, 'storePost'])->name('admin.blog.store');
-    //car
-    Route::get('/admin/cars/create', [AdminController::class, 'createCar'])->name('admin.cars.create');
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+//blog
+    Route::prefix('blog')->name('blog.')->group(function () {
+        Route::get('create', [BlogController::class, 'create'])->name('create');
+        Route::get('/article', [BlogController::class, 'indexArticle'])->name('index');
+        Route::post('/', [BlogController::class, 'storePost'])->name('store');
+    });
+//category post
+    Route::prefix('post-categories')->name('post-categories.')->group(function () {
+        Route::get('/', [BlogController::class, 'indexCategories'])->name('index');
+        Route::post('/', [BlogController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [BlogController::class, 'editCategory'])->name('edit');
+        Route::put('{id}', [BlogController::class, 'updateCategory'])->name('update');
+        Route::delete('{id}', [BlogController::class, 'destroyCategory'])->name('destroy');
+    });
+//cars
+    Route::prefix('cars')->name('cars.')->group(function () {
+        Route::get('create', [AdminController::class, 'createCar'])->name('create');
+    });
 });
 
 
-Route::middleware(['auth', 'role:moderator'])->group(function () {
-    Route::get('/moderator', [ModeratorController::class, 'index'])->name('moderator.dashboard');
+Route::middleware(['auth', 'role:moderator'])->prefix('moderator')->name('moderator.')->group(function () {
+    Route::get('/', [ModeratorController::class, 'index'])->name('dashboard');
 });
 //dla wszystkich
 

@@ -40,8 +40,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </button>
           {openPosts && (
             <div id="submenu-posts" className="ml-3 mb-1 space-y-1">
-              <Link className="block px-3 py-2 rounded hover:bg-gray-100" href="/admin/posts">Wszystkie posty</Link>
-              <Link className="block px-3 py-2 rounded hover:bg-gray-100" href="/admin/posts/create">Dodaj post</Link>
+              <Link className="block px-3 py-2 rounded hover:bg-gray-100" href="/admin/blog">Wszystkie posty</Link>
+              <Link className="block px-3 py-2 rounded hover:bg-gray-100" href="/admin/blog/create">Dodaj post</Link>
               <Link className="block px-3 py-2 rounded hover:bg-gray-100" href="/admin/post-categories">Kategorie</Link>
             </div>
           )}
