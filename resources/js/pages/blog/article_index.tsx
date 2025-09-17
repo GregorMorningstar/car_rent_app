@@ -11,6 +11,7 @@ type Post = {
     id: number;
     title: string;
     content: string;
+    image_path?: string | null;
 };
 
 type ArticleIndexProps = {
@@ -89,18 +90,29 @@ export default function ArticleIndex({ posts }: ArticleIndexProps) {
 
     const [isEditOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<Post | null>(null);
-    const { data, setData, put, processing, errors } = useForm<{ title: string; content: string }>({ title: "", content: "" });
+    const { data, setData, processing, errors, reset } = useForm<{ title: string; content: string; image: File | null }>({ title: "", content: "", image: null });
 
     const onEdit = (p: Post) => {
         setEditing(p);
-        setData({ title: p.title || "", content: p.content || "" });
+        setData({ title: p.title || "", content: p.content || "", image: null });
         setEditOpen(true);
     };
 
     const submitEdit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!editing) return;
-        put(`/admin/blog/${editing.id}`, { preserveScroll: true, onSuccess: () => setEditOpen(false) });
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('content', data.content);
+        if (data.image) formData.append('image', data.image);
+        router.post(`/admin/blog/${editing.id}?_method=PUT`, formData, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditOpen(false);
+                reset();
+            }
+        });
     };
 
     return (
@@ -209,6 +221,25 @@ export default function ArticleIndex({ posts }: ArticleIndexProps) {
                                 className="w-full min-h-28 rounded-md border px-3 py-2 text-sm"
                             />
                             {errors.content && <p className="text-sm text-red-600">{errors.content}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium" htmlFor="image">Obraz (opcjonalnie)</label>
+                            {editing?.image_path && (
+                                <div className="mb-2">
+                                    <img src={editing.image_path} alt="Aktualny" className="h-24 w-auto rounded border object-cover" />
+                                </div>
+                            )}
+                            <input
+                                id="image"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setData('image', file);
+                                }}
+                                className="block w-full text-sm"
+                            />
+                            {errors.image && <p className="text-sm text-red-600">{errors.image}</p>}
                         </div>
                         <DialogFooter className="justify-end gap-2">
                             <Button type="submit" disabled={processing} className="px-7 py-3">Zapisz</Button>

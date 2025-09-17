@@ -1,46 +1,16 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-interface Slide {
+
+export interface Car {
   id: number;
-  src: string;
-  title: string;
-  desc: string;
+  brand?: string;
+  model?: string;
+  image_path?: string | null;
+  price_per_day?: string | number | null;
 }
 
-const slides: Slide[] = [
-  {
-    id: 1,
-    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80',
-    title: 'Sportowy czerwony',
-    desc: 'Klasa premium'
-  },
-  {
-    id: 2,
-    src: 'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=900&q=80',
-    title: 'SUV czarny',
-    desc: 'Rodzinny komfort'
-  },
-  {
-    id: 3,
-    src: 'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?auto=format&fit=crop&w=900&q=80',
-    title: 'Miejski kompakt',
-    desc: 'Ekonomiczny wybór'
-  },
-  {
-    id: 4,
-    src: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=900&q=80',
-    title: 'Luksusowa limuzyna',
-    desc: 'Biznes klasa'
-  },
-  {
-    id: 5,
-    src: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=80',
-    title: 'Kabriolet',
-    desc: 'Na słoneczne dni'
-  },
-];
-
-export default function CaruselaCarInfo() {
+// Oczekuje props: cars: Car[]
+export default function CaruselaCarInfo({ cars }: { cars: Car[] }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [paused, setPaused] = useState(false);
 
@@ -109,24 +79,24 @@ export default function CaruselaCarInfo() {
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {slides.map(slide => (
+        {cars.map(car => (
           <div
-            key={slide.id}
+            key={car.id}
             data-slide
             className="snap-start w-full shrink-0 md:w-1/3"
           >
             <div className="group relative h-56 overflow-hidden rounded-xl border bg-card">
               <img
-                src={slide.src}
-                alt={slide.title}
+                src={car.image_path || '/images/placeholder-car.jpg'}
+                alt={car.model || car.brand || 'Samochód'}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-90" />
               <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                <h3 className="text-sm font-semibold leading-tight">{slide.title}</h3>
+                <h3 className="text-sm font-semibold leading-tight">{car.brand} {car.model}</h3>
                 <p className="mt-1 text-[11px] uppercase tracking-wide text-white/80">
-                  {slide.desc}
+                  {car.price_per_day ? `${Number(car.price_per_day).toFixed(2)} zł/dzień` : 'Cena niedostępna'}
                 </p>
               </div>
             </div>
@@ -136,7 +106,7 @@ export default function CaruselaCarInfo() {
 
       {/* Dots (opcjonalne – statyczne podglądowe) */}
       <div className="mt-2 flex justify-center gap-2">
-        {slides.map(s => (
+        {cars.map(s => (
           <span
             key={s.id}
             className="h-2 w-2 rounded-full bg-muted-foreground/30"

@@ -16,6 +16,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Interfaces\PostRepositoryInterface::class,
             \App\Repositories\PostRepository::class
         );
+        $this->app->bind(
+            \App\Interfaces\CarRepositoryInterface::class,
+            \App\Repositories\CarRepository::class
+        );
     }
     /**
      * Bootstrap any application services.

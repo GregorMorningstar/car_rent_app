@@ -3,8 +3,13 @@ import { usePage } from '@inertiajs/react';
 import LandingLayout from '@/layouts/landing-layout';
 import FullSplitSection from '@/components/landing/FullSplitSection';
 import CaruselaCarInfo from '@/components/carusela-car-info';
+import { Car } from "@/components/carusela-car-info";
 
-export default function Welcome() {
+type WelcomeProps = {
+  cars: Car[];
+};
+
+export default function Welcome({ cars }: WelcomeProps) {
   const { auth } = usePage<SharedData>().props;
 
   return (
@@ -20,7 +25,7 @@ export default function Welcome() {
           <h2 className="mb-8 text-2xl font-semibold tracking-tight md:text-3xl">
             Wybrane modele
           </h2>
-          <CaruselaCarInfo />
+            <CaruselaCarInfo cars={Array.isArray(cars) ? cars : []} />
         </div>
       </section>
 

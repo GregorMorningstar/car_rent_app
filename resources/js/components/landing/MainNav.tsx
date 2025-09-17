@@ -2,14 +2,19 @@ import { Link, usePage } from '@inertiajs/react';
 import { dashboard, login, register } from '@/routes';
 import { useState } from 'react';
 
-type Shared = { auth?: { user?: { name?: string } } };
+type Shared = { auth?: { user?: { name?: string; role?: string } } };
 
 // Responsive main navigation with an overlay menu
 export function MainNav() {
   const [open, setOpen] = useState(false);
   const { props } = usePage<Shared>();
-  const isAuth = !!props.auth?.user;
-  const userName = props.auth?.user?.name ?? 'Dashboard';
+  const user = props.auth?.user;
+  const isAuth = !!user;
+  const userName = user?.name ?? 'Dashboard';
+  const isAdmin = (user as any)?.role === 'admin' || (user as any)?.role === 'moderator';
+  const adminHref = '/admin';
+  const userDashboardHref = dashboard();
+  const targetDashboard = isAdmin ? adminHref : userDashboardHref;
 
   return (
     <header className="fixed top-0 left-0 w-full z-40 backdrop-blur bg-white/70 dark:bg-neutral-900/70 shadow">
@@ -27,7 +32,7 @@ export function MainNav() {
           <Link href="/blog" className="hover:text-[#F53003] transition">Blog</Link>
 
           {isAuth ? (
-            <Link href={dashboard()} className="px-4 py-1.5 rounded bg-[#F53003] text-white hover:bg-[#d72600] transition">
+            <Link href={targetDashboard} className="px-4 py-1.5 rounded bg-[#F53003] text-white hover:bg-[#d72600] transition">
               {userName}
             </Link>
           ) : (
@@ -60,7 +65,7 @@ export function MainNav() {
 
               {isAuth ? (
                 <Link
-                  href={dashboard()}
+                  href={targetDashboard}
                   onClick={() => setOpen(false)}
                   className="mt-2 px-4 py-2 rounded bg-[#F53003] text-white text-center"
                 >

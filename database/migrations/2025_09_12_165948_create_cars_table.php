@@ -15,14 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('registration_number')->unique(); // nr_rej
             $table->string('vin')->unique(); // nr_vin
-            $table->date('production_date'); // data_produkcji
-            $table->string('image_path')->nullable(); // sciezka_zdjecia
+            $table->date('production_date');
+            $table->string('image_path')->nullable();
             $table->string('brand');
             $table->string('model');
             $table->string('color');
             $table->integer('mileage');
             $table->string('fuel_type');
-            $table->integer('power'); // HP or kW
+            $table->integer('power');
             $table->integer('seats');
             $table->integer('doors');
             $table->decimal('price_per_day', 8, 2);
@@ -39,3 +39,4 @@ return new class extends Migration
         Schema::dropIfExists('cars');
     }
 };
+

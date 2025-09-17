@@ -203,6 +203,104 @@ class BlogController extends Controller
     }
 
     // ----------------------
+    // Post (admin update with optional image)
+    // ----------------------
+    public function updatePost(Request $request, int $id)
+    {
+        $model = $this->postService->findPost($id);
+        if (!$model) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'content' => ['required', 'string'],
+            'category_id' => ['nullable', 'exists:post_categories,id'],
+            'image' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,avif,gif', 'max:4096'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:255'],
+            'meta_keywords' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $data = $validated;
+        if (isset($data['category_id'])) {
+            $data['post_category_id'] = (int) $data['category_id'];
+            unset($data['category_id']);
+        }
+
+        try {
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                if (!$file->isValid()) {
+                    return back()->withErrors(['image' => 'Niepoprawny plik.'])->withInput();
+                }
+                $path = $file->store('image/article', 'public');
+                if (!$path) {
+                    return back()->withErrors(['image' => 'Błąd zapisu pliku.'])->withInput();
+                }
+                $path = str_replace('\\', '/', $path);
+                // usuń stary jeśli istnieje i inny
+                if ($model->image_path && $model->image_path !== $path && \Storage::disk('public')->exists($model->image_path)) {
+                    \Storage::disk('public')->delete($model->image_path);
+                }
+                $data['image_path'] = $path;
+                $data['og_image'] = $data['og_image'] ?? (request()->getSchemeAndHttpHost() . '/storage/' . ltrim($path, '/'));
+            }
+
+            // SEO fallbacky
+            $plain = $this->cleanMetaText((string) ($data['content'] ?? ''));
+            $site = (string) config('app.name', '');
+            $metaTitle = $data['meta_title'] ?? $data['title'];
+            $suffix = $site ? ' | ' . $site : '';
+            $fullTitle = $metaTitle . $suffix;
+            $data['meta_title'] = mb_strlen($fullTitle) <= 60 ? $fullTitle : Str::limit($fullTitle, 60, '');
+            $data['meta_description'] = $data['meta_description'] ?? $this->smartTrim($plain, 160);
+
+            if (empty($data['meta_keywords'])) {
+                $category = isset($data['post_category_id']) ? $this->postService->findCategory((int) $data['post_category_id']) : null;
+                $stop = ['i','oraz','dla','na','po','jak','o','do','z','ze','że','nie','to','a','w','u','od','bez','ale'];
+                $titleWords = collect(str_word_count(Str::lower($data['title']), 1, 'ąćęłńóśźż'))
+                    ->filter(fn ($w) => mb_strlen($w) >= 3 && !in_array($w, $stop, true))
+                    ->unique()->take(8)->values()->all();
+                $kw = array_values(array_filter(array_unique(array_merge(
+                    $category ? [Str::lower($category->name)] : [],
+                    $titleWords
+                ))));
+                $data['meta_keywords'] = implode(',', $kw);
+            }
+
+            unset($data['image']);
+            $this->postService->updatePost($id, $data);
+        } catch (\Throwable $e) {
+            \Log::error('Błąd aktualizacji posta', ['id' => $id, 'msg' => $e->getMessage()]);
+            return back()->withErrors(['general' => 'Nie udało się zaktualizować posta.'])->withInput();
+        }
+
+        return back()->with('success', 'Post został zaktualizowany.');
+    }
+
+    // ----------------------
+    // Post (admin delete)
+    // ----------------------
+    public function destroyPost(int $id)
+    {
+        $model = $this->postService->findPost($id);
+        if (!$model) {
+            abort(404);
+        }
+        try {
+            if ($model->image_path && \Storage::disk('public')->exists($model->image_path)) {
+                \Storage::disk('public')->delete($model->image_path);
+            }
+            $this->postService->deletePost($id);
+        } catch (\Throwable $e) {
+            \Log::error('Błąd usuwania posta', ['id' => $id, 'msg' => $e->getMessage()]);
+            return back()->withErrors(['general' => 'Nie udało się usunąć posta.']);
+        }
+        return back()->with('success', 'Post został usunięty.');
+    }
+
+    // ----------------------
     // Category (admin store)
     // ----------------------
     public function store(Request $request)

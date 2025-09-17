@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,8 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Tworzenie użytkowników o różnych rolach
         User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
@@ -34,6 +32,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@example.com',
             'role' => 'user',
             'password' => bcrypt('qwer1234'),
+        ]);
+
+        // Uruchomienie seedera dla samochodów
+        $this->call([
+            CarSeeder::class,
         ]);
     }
 }

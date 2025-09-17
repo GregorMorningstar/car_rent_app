@@ -8,9 +8,14 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ModeratorController;
+use App\Models\Car;
+
 Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+    $cars = Car::all();
+    return Inertia::render('welcome', [
+        'cars' => $cars,
+    ]);
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -22,8 +27,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 //blog
     Route::prefix('blog')->name('blog.')->group(function () {
         Route::get('create', [BlogController::class, 'create'])->name('create');
-        Route::get('/article', [BlogController::class, 'indexArticle'])->name('index');
+        Route::get('/', [BlogController::class, 'indexArticle'])->name('index');
         Route::post('/', [BlogController::class, 'storePost'])->name('store');
+        Route::put('{id}', [BlogController::class, 'updatePost'])->name('update');
+
+        Route::delete('{id}', [BlogController::class, 'destroyPost'])->name('destroy');
     });
 //category post
     Route::prefix('post-categories')->name('post-categories.')->group(function () {
@@ -35,8 +43,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     });
 //cars
     Route::prefix('cars')->name('cars.')->group(function () {
-        Route::get('create', [AdminController::class, 'createCar'])->name('create');
+        Route::get('/', [AdminController::class, 'indexCars'])->name('index');
+        Route::get('/create', [AdminController::class, 'createCar'])->name('create');
+        Route::post('/', [AdminController::class, 'storeCar'])->name('store');
+        Route::get('/{car}', [AdminController::class, 'showCar'])->name('show');
+        Route::get('/{car}/edit', [AdminController::class, 'editCar'])->name('edit');
+        Route::put('/{car}', [AdminController::class, 'updateCar'])->name('update');
+        Route::delete('/{car}', [AdminController::class, 'destroyCar'])->name('destroy');
     });
+
 });
 
 
@@ -47,7 +62,7 @@ Route::middleware(['auth', 'role:moderator'])->prefix('moderator')->name('modera
 
 Route::get('/kontakt', [PageController::class, 'showContact'])->name('contact');
 Route::get('/o-nas',[PageController::class, 'showAbout'])->name('about');
-
+Route::get('cars', [CarController::class, 'index'])->name('cars.index');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{id}', [BlogController::class, 'show'])->name('blog.show');
